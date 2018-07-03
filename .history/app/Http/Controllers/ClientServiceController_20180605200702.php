@@ -2,11 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Service;
 use App\Client;
+use App\Service;
+use App\Paymentservice;
+use App\Clientservice;
+use Illuminate\Http\Request;
+// use Illuminate\Routing\Route;
+use Illuminate\Support\Facades\Route;
 
-class Client_Service extends Controller
+
+
+class ClientServiceController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -15,10 +21,8 @@ class Client_Service extends Controller
      */
     public function index()
     {
-        // $service = Service::find(1)->clients;
-        // $client = Client::find(1)->services;
-        // return $client;
-
+        echo "tesT index";
+        //
     }
 
     /**
@@ -39,7 +43,15 @@ class Client_Service extends Controller
      */
     public function store(Request $request)
     {
-        //
+        // dd($request);
+        //pobieramy usera
+        $client = Client::find($request->client_id);
+        //znajdujemy jegp id
+
+        $client->services()->attach($request->service_id, ['cs_start_datefirst' => $request->cs_start_datefirst, 'cs_start_active' => '1']);
+  
+        return redirect()->route('clientServices', ['id' => $request->client_id]);
+
     }
 
     /**
@@ -50,11 +62,20 @@ class Client_Service extends Controller
      */
     public function show($id)
     {
-        // $client = Client::find($id)->services;
-        // return $client;
+        $Paymentservice = new Paymentservice();
+        $ExpiredPaymentForClient = $Paymentservice->getExpiredPaymentForClient($id);
+        // dd($ExpiredPaymentForClient);
+        $Client = Client::find($id);
+        $clientServices = Client::find($id)->services;
+        $Services = Service::all();
+        return view('client_services.index', compact('clientServices', 'Client', 'Services'));
 
     }
-
+ 
+    public function show_payment_details($id)
+    {
+        return view('client_services.show_payment_details');
+    }
     /**
      * Show the form for editing the specified resource.
      *
@@ -63,7 +84,7 @@ class Client_Service extends Controller
      */
     public function edit($id)
     {
-        dd('cs edit');
+        //
     }
 
     /**
